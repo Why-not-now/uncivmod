@@ -1,1 +1,1 @@
-"""Typing for unciv JSON."""
+"""Typing for unciv modding."""
