@@ -1,0 +1,1 @@
+"""Typing for unciv JSON."""

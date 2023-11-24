@@ -1,0 +1,4 @@
+Cannot build [baseUnitFilter] units
+Rough terrain penalty
+Instantly consumes [+amount] [stockpiledResource]
+Consumes [+amount] [resource]

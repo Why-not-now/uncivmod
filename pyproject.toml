@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uncivmod"
+description = "The unciv module aims to aid with the modding of the unciv game."
+readme = "README.md"
+authors = [
+  { name="Mushroom boi"},
+]
+requires-python = ">=3.12"
+license = "MIT"
+keywords = [
+  "unciv",
+  "modding"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/Why-not-now/uncivmod"
+Issues = "https://github.com/Why-not-now/uncivmod/issues"
