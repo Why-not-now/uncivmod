@@ -36,7 +36,7 @@ class BuildingJSON(TypedDict, total=False):
     providesFreeBuilding: str
     requiredTech: str
     requiredResource: str
-    requiredNearbylmprovedResources: list[str]
+    requiredNearbyImprovedResources: list[str]
     replaces: str
     uniqueTo: str
     xpForNewUnits: int
@@ -44,8 +44,8 @@ class BuildingJSON(TypedDict, total=False):
     cityHealth: int
     hurryCostModifier: int
     quote: str
-    uniques: int
-    replacementTextForUniques: list[str]
+    uniques: list[str]
+    replacementTextForUniques: str
     percentStatBonus: PercentStatsJSON
     greatPersonPoints: dict[str, int]
     civilopediaText: list[CivilopediaTextJSON]
@@ -108,7 +108,7 @@ class ImprovementJSON(TypedDict, total=False):
     """Improvements that can be constructed or created on a map tile by a unit."""  # noqa: E501
 
     name: Required[str]
-    terrainsCanBeFoundOn: str
+    terrainsCanBeFoundOn: list[str]
     techRequired: str
     uniqueTo: str
     food: int
@@ -118,7 +118,7 @@ class ImprovementJSON(TypedDict, total=False):
     culture: int
     happiness: int
     faith: int
-    tumsToBuild: int
+    turnsToBuild: int
     uniques: list[str]
     shortcutKey: str
     civilopediaText: list[CivilopediaTextJSON]
@@ -174,8 +174,8 @@ class NationJSON(TypedDict, total=False):
     name: Required[str]
     leaderName: str
     style: str
-    adjective: str
-    cityStateType: int
+    adjective: str  # unused
+    cityStateType: base.CityStateEnum
     startBias: list[str]
     preferredVictoryType: base.VictoryGoalEnum
     startIntroPart1: str
@@ -184,11 +184,11 @@ class NationJSON(TypedDict, total=False):
     attacked: str
     defeated: str
     introduction: str
-    neutralHeIIo: str
+    neutralHello: str
     hateHello: str
     tradeRequest: str
     innerColor: list[int]
-    outercolor: list[int]
+    outerColor: list[int]
     uniqueName: str
     uniqueText: str
     uniques: list[str]
@@ -264,6 +264,7 @@ class RuinJSON(TypedDict, total=False):
     weight: int
     uniques: list[str]
     excludedDiffculties: list[str]
+    color: base.RGBColour
 
 
 class SpecialistJSON(TypedDict, total=False):
@@ -293,7 +294,7 @@ class SpeedJSON(TypedDict, total=False):
     improvementBuildLengthModifier: float
     barbarianModifier: float
     goldGiftModifier: float
-    cityStateTributeScalinglnterval: float
+    cityStateTributeScalingInterval: float
     goldenAgeLengthModifier: float
     religiousPressureAdjacentCity: int
     peaceDealDuration: int
@@ -310,15 +311,15 @@ class TechColumnJSON(TypedDict):
     techCost: int
     buildingCost: int
     wonderCost: int
-    techs: int
+    techs: list[TechJSON]
 
 
 class TechJSON(TypedDict, total=False):
     """Technologies that can be researched with science."""
 
     name: Required[str]
-    row: int
     cost: int
+    row: int
     prerequisites: list[str]
     quote: str
     uniques: list[str]
@@ -331,7 +332,7 @@ class TerrainJSON(TypedDict, total=False):
     name: Required[str]
     type: Required[base.TerrainEnum]
     occursOn: list[str]
-    tunsInto: str
+    turnsInto: str
     weight: int
     food: int
     production: int
@@ -370,8 +371,8 @@ class TutorialJSON(TypedDict, total=True):
     """  # noqa: E501
 
     name: Required[str]
-    civilopediaText: list[CivilopediaTextJSON]
     steps: list[str]
+    civilopediaText: list[CivilopediaTextJSON]
 
 
 class UnitJSON(TypedDict, total=False):
@@ -436,7 +437,7 @@ class VictoryType(TypedDict, total=False):
     victoryScreenHeader: str
     victoryString: str
     defeatString: str
-    hiddenlnVictoryScreen: bool
+    hiddenInVictoryScreen: bool
     requiredSpaceshipParts: list[str]
     Milestones: list[str]
 
@@ -505,6 +506,9 @@ class StatsJSON(TypedDict, total=False):
 
 class TimePerTurnJSON(TypedDict):
     """The amount of time passed between turns and the range of turn numbers that this duration applies to."""  # noqa: E501
+
+    yearsPerTurn: int
+    untilTurn: int
 
 
 class VictoryPrioritiesJSON(TypedDict, total=False):
