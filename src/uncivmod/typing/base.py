@@ -127,17 +127,6 @@ class BeliefEnum(_StrEnum):
     Enhancer = auto()
 
 
-class CityStateEnum(_StrEnum):
-    """Types of city states in Unciv."""
-
-    absent = auto()
-    Neutral = auto()
-    Cultural = auto()
-    Diplomatic = auto()
-    Domination = auto()
-    Scientific = auto()
-
-
 class MovementEnum(_StrEnum):
     """Types of movements in Unciv."""
 
@@ -227,7 +216,13 @@ class CivilopediaText:
 class RGBColour:  # yes British spelling
     """RGB Colour used generally."""
 
-    r: int = field(default=0, kw_only=True)
+    r: int = field(
+        default=cast(int, 0),
+        kw_only=True,
+        validator=_validate_or_var(
+            _ge0, validators.le(255), msg_after=" is not between 0 and 255"
+        ),
+    )
     g: int = field(default=0, kw_only=True)
     b: int = field(default=0, kw_only=True)
 
@@ -333,17 +328,15 @@ class Building:
     happiness: int = 0
     faith: int = 0
     maintenance: int = field(default=cast(int, 0), validator=_ge0)
-    iswonder: bool = False
+    is_wonder: bool = False
     is_national_wonder: bool = False
     required_building: str = ""
-    cannot_be_buitt_with: str = ""
     provides_free_building: str = ""
     required_tech: str = ""
     required_resource: str = ""
     required_nearby_improved_resources: list[str] = Factory(list)
     replaces: str = ""
     unique_to: str = ""
-    xp_for_new_units: int = field(default=cast(int, 0), validator=_ge0)
     city_strength: int = 0
     city_health: int = 0
     hurry_cost_modifier: int = 0
@@ -361,7 +354,7 @@ class CityState:
     """City states."""
 
     name: str
-    city_state_type: CityStateEnum
+    city_state_type: str
     style: str = ""
     # adjective: str = ""   TODO
     start_bias: list[str] = Factory(list)
@@ -378,32 +371,42 @@ class CityState:
 
 
 @define
+class CityStateType:
+    """City states."""
+
+    name: str
+    color: RGBColour
+    friend_bonus_uniques: list[str] = Factory(list)
+    ally_bonus_uniques: list[str] = Factory(list)
+
+
+@define
 class Difficulty:
     """Difficulty levels a player can choose when starting a new game."""
 
     name: str
-    base_happiness: int | None
-    extra_happiness_per_luxury: float | None
-    research_cost_modifier: float | None
-    unit_cost_modifier: float | None
-    building_cost_modifier: float | None
-    policy_cost_modifier: float | None
-    unhappiness_modifier: float | None
-    barbarian_bonus: float | None
+    base_happiness: int = 0
+    extra_happiness_per_luxury: float = 0
+    research_cost_modifier: float = 1
+    unit_cost_modifier: float = 1
+    building_cost_modifier: float = 1
+    policy_cost_modifier: float = 1
+    unhappiness_modifier: float = 1
+    barbarian_bonus: float = 0
     player_bonus_starting_units: list[str] = Factory(list)
-    ai_city_growrth_modifier: float | None
-    ai_unit_cost_modifier: float | None
-    ai_bui_iding_cost_modifier: float | None
-    ai_wonder_cost_modifier: float | None
-    ai_building_maintenance_modifier: float | None
-    ai_unit_maintenance_modifier: float | None
+    ai_city_growth_modifier: float = 1
+    ai_unit_cost_modifier: float = 1
+    ai_building_cost_modifier: float = 1
+    ai_wonder_cost_modifier: float = 1
+    ai_building_maintenance_modifier: float = 1
+    ai_unit_maintenance_modifier: float = 1
     ai_free_techs: list[str] = Factory(list)
     ai_major_civ_bonus_starting_units: list[str] = Factory(list)
     ai_city_state_bonus_starting_units: list[str] = Factory(list)
-    ai_unhappiness_modifier: float | None
+    ai_unhappiness_modifier: float = 1
     # ais_exchange_techs: bool  # unimplemented  # noqa: ERA001
-    tum_barbarians_can_enter_player_tiles: int | None
-    clear_barbarian_camp_reward: int | None
+    turn_barbarians_can_enter_player_tiles: int = 0
+    clear_barbarian_camp_reward: int = 25
 
 
 @define
@@ -411,19 +414,28 @@ class Era:
     """Eras are usually group technologies together and change gameplay."""
 
     name: str
-    research_agreement_cost: int | None
-    icon_rgb: RGBColour | None
-    unit_base_buy_cost: int | None
-    starting_settler_count: int | None
-    starting_settler_unit: str | None
-    starting_worker_count: int | None
-    starting_worker_unit: str | None
-    starting_military_unit_count: int | None
-    starting_military_unit: str | None
-    starting_gold: int | None
-    starting_culture: int | None
-    settler_population: list[str] = Factory(list)
+    research_agreement_cost: int = field(
+        default=cast(int, 300), validator=_ge0
+    )
+    icon_rgb: RGBColour = Factory(lambda: RGBColour(r=255, g=255, b=255))
+    unit_base_buy_cost: int = 200
+    starting_settler_count: int = field(default=cast(int, 1), validator=_ge0)
+    starting_settler_unit: str = "Settler"
+    starting_worker_count: int = field(default=cast(int, 0), validator=_ge0)
+    starting_worker_unit: str = "Worker"
+    starting_military_unit_count: int = field(
+        default=cast(int, 0), validator=_ge0
+    )
+    starting_military_unit: str = "Warrior"
+    starting_gold: int = field(default=cast(int, 0), validator=_ge0)
+    starting_culture: int = field(default=cast(int, 0), validator=_ge0)
+    settler_population: int = 0
     settler_buildings: list[str] = Factory(list)
+    starting_obsolete_wonders: list[str] = Factory(list)
+    base_unit_buy_cost: int = 200
+    embark_defense: int = 3
+    start_percent: int = 0
+    city_sound: str = "cityClassical"
 
 
 @define
@@ -485,7 +497,7 @@ class Improvement:
     faith: int = 0
     turns_to_build: int | None = field(
         default=cast(int | None, None), validator=_validate_none(_ge0)
-    )
+    )  # Can not be built if cost is -1 ¯\_(ツ)_/¯, negative same as 0 (always 1 turn)  # noqa: E501
     uniques: list[str] = Factory(list)
     shortcut_key: str = field(
         default=cast(str, ""), validator=validators.max_len(1)
@@ -576,6 +588,7 @@ class Nation:
     """Nations and city states, including Barbarians and Spectator."""
 
     name: str
+    outer_colour: RGBColour
     leader_name: str = ""
     style: str = ""
     # adjective: str = ""   TODO
@@ -591,7 +604,6 @@ class Nation:
     hate_hello: str = ""
     trade_request: str = ""
     inner_colour: RGBColour = Factory(RGBColour)
-    outer_colour: RGBColour = Factory(RGBColour)
     unique_name: str = ""
     unique_text: str = ""
     uniques: list[str] = Factory(list)
@@ -640,9 +652,9 @@ class Promotion:
     """Available unit promotions."""
 
     name: str
-    prerequisites: str | None
-    column: int | None
-    row: int | None
+    prerequisites: list[str] = Factory(list)
+    column: int = field(default=cast(int, 0), validator=_ge0)
+    row: int = field(default=cast(int, 0), validator=_ge0)
     unit_types: list[str] = Factory(list)
     uniques: list[str] = Factory(list)
     civilopedia_text: list[CivilopediaText] = Factory(list)
@@ -730,7 +742,7 @@ class Tech:
     """Technologies that can be researched with science."""
 
     name: str
-    cost: int = 0 # if 0 get from TechColumn
+    cost: int = 0  # if 0 get from TechColumn
     row: int = 0
     prerequisites: list[str] = Factory(list)
     quote: str = ""
@@ -788,21 +800,21 @@ class Unit:
     unit_type: str
     cost: int = 0
     movement: int = field(default=cast(int, 0), validator=_ge0)
-    strength: int | None
-    ranged_strength: int | None
-    range: int | None  # noqa: A003
-    intercept_range: int | None
-    required_tech: str | None
-    obsolete_tech: str | None
-    required_resource: str | None
-    upgrades_to: str | None
-    replaces: str | None
-    unique_to: str | None
-    hurry_cost_modifier: int | None
+    strength: int = 0
+    ranged_strength: int = 0
+    range: int = 2  # noqa: A003
+    intercept_range: int = field(default=cast(int, 0), validator=_ge0)
+    required_tech: str = ""
+    obsolete_tech: str = ""
+    required_resource: str = ""
+    upgrades_to: str = ""
+    replaces: str = ""
+    unique_to: str = ""
+    hurry_cost_modifier: int = 0
     promotions: list[str] = Factory(list)
     uniques: list[str] = Factory(list)
-    replacement_text_for_uniques: str | None
-    attack_sound: str | None
+    replacement_text_for_uniques: str = ""
+    attack_sound: str = ""
     civilopedia_text: list[CivilopediaText] = Factory(list)
 
 
@@ -811,7 +823,7 @@ class UnitType:
     """Units, both military and civilian."""
 
     name: str
-    movement_type: str
+    movement_type: MovementEnum
     uniques: list[str] = Factory(list)
 
 

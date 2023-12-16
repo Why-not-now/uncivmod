@@ -32,14 +32,12 @@ class BuildingJSON(TypedDict, total=False):
     isWonder: bool
     isNationalWonder: bool
     requiredBuilding: str
-    cannotBeBuittWith: str
     providesFreeBuilding: str
     requiredTech: str
     requiredResource: str
     requiredNearbyImprovedResources: list[str]
     replaces: str
     uniqueTo: str
-    xpForNewUnits: int
     cityStrength: int
     cityHealth: int
     hurryCostModifier: int
@@ -49,6 +47,16 @@ class BuildingJSON(TypedDict, total=False):
     percentStatBonus: PercentStatsJSON
     greatPersonPoints: dict[str, int]
     civilopediaText: list[CivilopediaTextJSON]
+
+
+
+class CityStateTypeJSON(TypedDict, total=False):
+    """Types of city state and its bonuses."""
+
+    name: Required[str]
+    color: Required[list[int]]
+    friendBonusUniques: list[str]
+    allyBonusUniques: list[str]
 
 class DifficultyJSON(TypedDict, total=False):
     """Difficulty levels a player can choose when starting a new game."""
@@ -63,9 +71,9 @@ class DifficultyJSON(TypedDict, total=False):
     unhappinessModifier: float
     barbarianBonus: float
     playerBonusStartingUnits: list[str]
-    aiCityGrowrthModifier: float
+    aiCityGrowthModifier: float
     aiUnitCostModifier: float
-    aiBuiIdingCostModifier: float
+    aiBuildingCostModifier: float
     aiWonderCostModifier: float
     aiBuildingMaintenanceModifier: float
     aiUnitMaintenanceModifier: float
@@ -74,7 +82,7 @@ class DifficultyJSON(TypedDict, total=False):
     aiCityStateBonusStartingUnits: list[str]
     aiUnhappinessModifier: float
     aisExchangeTechs: bool  # unimplemented
-    tumBarbariansCanEnterPlayerTiles: int
+    turnBarbariansCanEnterPlayerTiles: int
     clearBarbarianCampReward: int
 
 
@@ -93,8 +101,13 @@ class EraJSON(TypedDict, total=False):
     startingMilitaryUnit: str
     startingGold: int
     startingCulture: int
-    settlerPopulation: list[str]
+    settlerPopulation: int
     settlerBuildings: list[str]
+    startingObsoleteWonders: list[str]
+    baseUnitBuyCost: int
+    embarkDefense: int
+    startPercent: int
+    citySound: str
 
 
 class GlobalUniquesJSON(TypedDict):
@@ -175,7 +188,7 @@ class NationJSON(TypedDict, total=False):
     leaderName: str
     style: str
     adjective: str  # unused
-    cityStateType: base.CityStateEnum
+    cityStateType: str
     startBias: list[str]
     preferredVictoryType: base.VictoryGoalEnum
     startIntroPart1: str
@@ -188,7 +201,7 @@ class NationJSON(TypedDict, total=False):
     hateHello: str
     tradeRequest: str
     innerColor: list[int]
-    outerColor: list[int]
+    outerColor: Required[list[int]]
     uniqueName: str
     uniqueText: str
     uniques: list[str]
@@ -210,7 +223,7 @@ class PromotionJSON(TypedDict, total=False):
     """Available unit promotions."""
 
     name: Required[str]
-    prerequisites: str
+    prerequisites: list[str]
     effect: str  # deprecated
     column: int
     row: int
@@ -404,7 +417,7 @@ class UnitTypeJSON(TypedDict, total=False):
     """Units, both military and civilian."""
 
     name: Required[str]
-    movementType: Required[str]
+    movementType: Required[base.MovementEnum]
     uniques: list[str]
 
 
